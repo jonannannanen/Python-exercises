@@ -4,3 +4,12 @@
 # names of the cities one by one, one city per line, in the same order
 # they were read as input. Use a for loop for asking the names and a
 # for/in loop to iterate through the list.
+
+cities = []
+
+for i in range(5):
+    city = input("Enter city: ")
+    cities.append(city)
+
+for city in cities:
+    print (city)
