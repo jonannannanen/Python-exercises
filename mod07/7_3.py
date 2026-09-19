@@ -5,14 +5,14 @@
 # Conversions continue until the user inputs a negative value.
 # 1 gallon = 3,785 liters
 
-gallons = int(input("Gallons: "))
+gallons = float(input("Gallons: "))
 
 def liters(gallons):
     result = gallons * 3.785
     return result
 
-result = liters(gallons)
+while gallons >= 0:
+    result = liters(gallons)
+    print(result)
 
-print(result)
-
-while result <= 0:
+    gallons = float(input("Gallons: "))
