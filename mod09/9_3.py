@@ -16,6 +16,9 @@ class Auto:
         else:
             self.tämänhetkinen_nopeus = self.tämänhetkinen_nopeus + muutos
 
+    def kulje(self, tunnit):
+        self.kuljettu_matka = self.kuljettu_matka + self.tämänhetkinen_nopeus * tunnit
+
 auto1 = Auto("ABC-123", 142)
 
 auto1.kiihdytä(30)
@@ -25,6 +28,11 @@ auto1.kiihdytä(50)
 print(f"Nopeus: {auto1.tämänhetkinen_nopeus} km/h")
 
 auto1.kiihdytä(-200)
+
+auto1.kiihdytä(30)
+auto1.kulje(1.5)
+
+print(auto1.kuljettu_matka)
 
 print(f"Nopeus hätäjarrutuksen jälkeen: {auto1.tämänhetkinen_nopeus} km/h")
 
