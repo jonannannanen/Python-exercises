@@ -6,13 +6,13 @@
 # jälkeen luodun auton kaikki ominaisuudet.
 
 class Auto:
-    def __init__(self, rekisteritunnus, huippunopeus, tämänhetkinen_nopeus=0, kuljettu_matka=0):
+    def __init__(self, rekisteritunnus, huippunopeus):
         self.rekisteritunnus = rekisteritunnus
         self.huippunopeus = huippunopeus
-        self.tämänhetkinen_nopeus = tämänhetkinen_nopeus
-        self.kuljettu_matka = kuljettu_matka
+        self.tämänhetkinen_nopeus = 0
+        self.kuljettu_matka = 0
 
-auto1 = Auto("ABC-123", "142 km/h")
+auto1 = Auto("ABC-123", 142)
 
 print(f"Auton rekisteritunnus on {auto1.rekisteritunnus} ja huippunopeus {auto1.huippunopeus}.\n")
 print(f"Tämänhetkinen nopeus: {auto1.tämänhetkinen_nopeus}.\nKuljettu matka: {auto1.kuljettu_matka}.")
