@@ -1,3 +1,5 @@
+import json
+
 class Player():
 	def __init__(self, playername, inventory, location, hp=12, strength=5):
 		self.playername = playername
@@ -29,6 +31,59 @@ class Item():
 	def __init__(self, name, effect):
 		self.name = name
 		self.effect = effect
+
+# TIEDOSTONKÄSITTELYT
+
+def show_intro():
+	with open("peliprojekti/intro.txt", "r") as file:
+		print(file.read())
+
+def show_instructions():
+	with open("peliprojekti/ohjeet.txt", "r") as file:
+		print(file.read())
+
+def save_game(player):
+	data = {
+		"name": player.player.name,
+		"hp": player.hp,
+		"strength": player.strength,
+		"inventory": [item.name for item in player.inventory],
+		"location": player.location.name,
+		"rooms": {}
+	}
+
+	for room in rooms.values():
+		data["rooms"][room.name] = {
+			"visited": room.visited,
+			"items": [item.name for item in room.items]
+		}
+
+	with open("savegame.txt", "w") as file:
+		json.dump(data, file)
+
+	print("Game saved.")
+
+def load_game():
+	with open("savegame.txt", "r") as file:
+		data = json.load(file)
+
+for room_name, room_data in data["rooms"].items():
+	room = rooms[room_name]
+	room.visited = room_data["visited"]
+	room.items = [
+		items[item_name]
+		for item_name in room_data["items"]
+	]
+
+	player = Player(
+		data["name"],
+		[items[name] for name in data["inventory"]],
+		rooms[data["locatio"]],
+		data["hp"],
+		data["strength"]
+	)
+
+# TIEDOSTONKÄSITTELYT
 
 def investigate_upstairs(player):
 	choice = input("You find a dark corridor that leads to one creaking door. Will you go inside? Y or N")
@@ -185,8 +240,16 @@ def inventory(player):
 rabbit_foot = Item("Rabbit's foot", "luck") # antaa onnea mörön kanssa, mutta jos talosta poistuu sen kanssa, kuolee jalasta saatuun tautiin
 dark_vial = Item("Dark vial", "doom") # kun hp:ta menettää, peli kysyy haluaako pelaaja käyttää itemin jos se on kerätty. pullossa on myrkkyä
 talisman = Item("Ancient talisman", "protection") # suojelee möröltä, mutta jos talosta poistuu sen kanssa, jokin seuraa sinua kotiin
-lance = Item("Lance", "lucky way out?")
+lance = Item("Lance", "lucky way out?") # vaihtoehtoinen tapa paeta talosta, pelaaja menettää 6 hpta, ja pakenee jos selviää pudotuksesta
 key = Item("Key", "a way out")
+
+items = {
+	"Rabbit's foot": rabbit_foot,
+	"Dark vial": dark_vial,
+	"Ancient talisman": talisman,
+	"Lance": lance,
+	"Key": key
+}
 
 # huoneissa itemit listana, koska joissain on monta itemiä, joissain ei mitään
 
@@ -196,24 +259,51 @@ kitchen = Room("Kitchen", [rabbit_foot, dark_vial])
 upstairs = Room("Upstairs", [])
 basement = Room("Basement", [talisman, key])
 
-name = input("Enter your name: ")
+rooms = {
+	"Main floor": main_floor,
+	"Armory": armory,
+	"Kitchen": kitchen,
+	"Upstairs": upstairs,
+	"Basement": basement
+}
 
-age = int(input("Enter your age: "))
+# PÄÄOHJELMA
 
-if age < 12:
-	print("You are a minor. Game over.")
+show_intro()
+show_instructions()
 
-else:
-	player = Player(name, [], main_floor)
+print("New game, press 1")
+print("Continue game, press 2")
 
-	print("Welcome " +name+ "!")
+choice = input("Choose: ")
 
+player = None
+
+if choice == "1":
+	name = input("Enter your name: ")
+	age = int(input("Enter your age: "))
+
+	if age < 12:
+		print("You are a minor. Game over.")
+
+	else:
+		player = Player(name, [], main_floor)
+
+		print("Welcome " +name+ "!")
+
+		command = ""
+
+elif choice == "2":
+	player = load_game()
+
+if player is not None:
 	command = ""
 
 	while command != "quit" and player.hp > 0:
 		print()
 		print("Current location: ", player.location.name)
 		print("Menu")
+		print("Save")
 		print("Investigate upstairs")
 		print("Investigate main floor")
 		print("Investigate basement")

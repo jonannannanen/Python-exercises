@@ -1,0 +1,6 @@
+GAME INSTRUCTIONS
+
+Investigate the different floors and rooms of the house.
+Collect items that might possibly help your survival.
+
+The game is over if your HP reaches zero, or you manage to get out of the house.
