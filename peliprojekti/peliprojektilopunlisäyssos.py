@@ -1,5 +1,5 @@
 class Player():
-	def __init__(self, playername, inventory, location, hp=10, strength=5):
+	def __init__(self, playername, inventory, location, hp=12, strength=5):
 		self.playername = playername
 		self.hp = hp
 		self.strength = strength
@@ -20,9 +20,10 @@ class Player():
 		print("HP:", self.hp)
 
 class Room():
-	def __init__(self, name, items=None):
+	def __init__(self, name, items=None): # kaikissa huoneissa ei välttämättä itemeitä
 		self.name = name
 		self.items = items
+		self.visited = False
 
 class Item():
 	def __init__(self, name, effect):
@@ -33,18 +34,45 @@ def investigate_upstairs(player):
 	choice = input("You find a dark corridor that leads to one creaking door. Will you go inside? Y or N")
 
 	if choice == "Y":
+		print("The creature in the room attacks you.")
+
+		if lance in player.inventory:
+			print("You use the lance to yeet past the creature and leap out of the window.")
+			player.lose_hp(6)
+
+			if player.hp > 0:
+				print("You survive the fall and managed to get home.")
+				return True
+
+			else:
+				print("You escaped the creature but not the fall.")
+				return True
+
 		if talisman in player.inventory:
+			print("The talisman protects you and shields you from more damage. It breaks upon use.")
 			player.lose_hp(4)
+			player.inventory.remove(talisman)
 
 		else:
+			print("You have nothing to protect yourself with.")
 			player.lose_hp(8)
+
+		if player.hp > 0 and dark_vial in player.inventory:
+			drink_choice = input("Would you like to drink the vial? Y or N")
 	
-	if choice == "N":
+			if drink_choice == "Y":
+				print("The vial is filled with poison.") # jekkujekku, ei kannata juoda tuntemattomia nesteitä
+				player.lose_hp(12)
+	
+	elif choice == "N":
 		if rabbit_foot in player.inventory:
 			print("The creature in the room hears you as you turn back.\nYou reach the staircase and notice that it won't move past it and retreats.")
+			print("Your lucky charm turns into dust.")
+			player.inventory.remove(rabbit_foot)
+
 		else:
-			player.lose_hp(6)
 			print("The creature still hears you and attcks you as you turn your back.")
+			player.lose_hp(6)
 
 def investigate_main_floor(player):
 	print("You stumble upon an old kitchen.")
@@ -78,8 +106,37 @@ def investigate_main_floor(player):
 	else:
 		print("You already looted this place.")
 
+def investigate_armory(player):
+	if armory.visited == False:
+		print("You enter an old armory.")
+		armory.visited = True
+
+	else:
+		print("You return to the armory. It's still dusty in there.")
+
+	if lance in armory.items:
+		choice = input("You see an old lance covered in dust. Will you pick it up? Y or N")
+
+		if choice == "Y":
+			player.collect_item(lance)
+			armory.items.remove(lance)
+
+		else:
+			print("Why would you leave it there?")
+
+# kellari pitää lootata kahteen kertaan että pelin saa pelattua läpi
+
 def investigate_basement(player):
-	print("You fall into an ancient chapel.")
+	if basement.visited == False:
+		print("You fall into an ancient chapel and crack your back.")
+		player.lose_hp(2)
+		basement.visited = True
+
+		if player.hp == 0:
+			return
+
+	else:
+		print("You return to the chapel.")
 
 	if talisman in basement.items:
 		choice = input("You find an ancient talisman. Will you pick it up? Y or N")
@@ -90,24 +147,51 @@ def investigate_basement(player):
 
 	else:
 		print("You find a hidden staircase where the talisman was.")
+		
 		if key in basement.items:
 			print("Below you find an old brass key.")
 			player.collect_item(key)
 			basement.items.remove(key)
 
-def leave_the_house():
-	print("You find that the door has been sealed shut. You're trapped.")
+def leave_the_house(player):
+
+	if key in player.inventory and rabbit_foot in player.inventory:
+		print("You unlock the door and escape.")
+		print("You survived. Kind of.")
+		print("Later you die of infection caught from the rabbit's foot.")
+		return True
+
+	elif key in player.inventory and talisman in player.inventory:
+		print("You unlock the door and escape.")
+		print("As you walk away, you feel the talisman burn in your pocket.")
+		print("You survived but something unpleasant followed you home.")
+		return True
+	
+	elif key in player.inventory:
+		print("You unlock the door and escape.")
+		print("Congratulations. You survived.")
+		return True
+
+	# peli on läpäisty kun avain on inventoryssa ja tutkitaan sen jälkeen ulko-ovi
+
+	else:
+		print("You find that the door has been sealed shut. You're trapped.")
+		return False
 
 def inventory(player):
 	for item in player.inventory:
 		print(item.name)
 
-rabbit_foot = Item("Rabbit's foot", "luck")
-dark_vial = Item("Dark vial", "doom")
-talisman = Item("Ancient talisman", "protection")
+rabbit_foot = Item("Rabbit's foot", "luck") # antaa onnea mörön kanssa, mutta jos talosta poistuu sen kanssa, kuolee jalasta saatuun tautiin
+dark_vial = Item("Dark vial", "doom") # kun hp:ta menettää, peli kysyy haluaako pelaaja käyttää itemin jos se on kerätty. pullossa on myrkkyä
+talisman = Item("Ancient talisman", "protection") # suojelee möröltä, mutta jos talosta poistuu sen kanssa, jokin seuraa sinua kotiin
+lance = Item("Lance", "lucky way out?")
 key = Item("Key", "a way out")
 
+# huoneissa itemit listana, koska joissain on monta itemiä, joissain ei mitään
+
 main_floor = Room("Main floor", [])
+armory = Room("Armory", [lance])
 kitchen = Room("Kitchen", [rabbit_foot, dark_vial])
 upstairs = Room("Upstairs", [])
 basement = Room("Basement", [talisman, key])
@@ -126,7 +210,7 @@ else:
 
 	command = ""
 
-	while command != "quit" or player.hp > 0:
+	while command != "quit" and player.hp > 0:
 		print()
 		print("Current location: ", player.location.name)
 		print("Menu")
@@ -140,27 +224,38 @@ else:
 	
 		if command == "Investigate upstairs":
 			player.move(upstairs)
-			investigate_upstairs(player)
+
+			if investigate_upstairs(player):
+				break
 
 		elif command == "Investigate main floor":
-			player.move(kitchen)
-			investigate_main_floor(player)
+			room_choice = input("Where would you like to go? Kitchen or armory? K or A")
+
+			if room_choice == "K":
+				player.move(kitchen)
+				investigate_main_floor(player)
+
+			elif room_choice == "A":
+				player.move(armory)
+				investigate_armory(player)
 
 		elif command == "Investigate basement":
 			player.move(basement)
 			investigate_basement(player)
 
 		elif command == "Leave the house":
-			leave_the_house()
+			if leave_the_house(player):
+				break
 
 		elif command == "Inventory":
 			inventory(player)
 
 		elif command == "quit":
-			print("You failed.")
+			print("Bye.")
+			break
 
 		else:
 			print("Unknown command.")
 
 	if player.hp == 0:
-		print("You died")
+		print("You died.")
