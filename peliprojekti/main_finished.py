@@ -44,7 +44,7 @@ def show_instructions():
 
 def save_game(player):
 	data = {
-		"name": player.player.name,
+		"name": player.playername,
 		"hp": player.hp,
 		"strength": player.strength,
 		"inventory": [item.name for item in player.inventory],
@@ -67,21 +67,24 @@ def load_game():
 	with open("savegame.txt", "r") as file:
 		data = json.load(file)
 
-for room_name, room_data in data["rooms"].items():
-	room = rooms[room_name]
-	room.visited = room_data["visited"]
-	room.items = [
-		items[item_name]
-		for item_name in room_data["items"]
-	]
+	for room_name, room_data in data["rooms"].items():
+		room = rooms[room_name]
+		room.visited = room_data["visited"]
+		room.items = [
+			items[item_name]
+			for item_name in room_data["items"]
+		]
 
 	player = Player(
 		data["name"],
 		[items[name] for name in data["inventory"]],
-		rooms[data["locatio"]],
+		rooms[data["location"]],
 		data["hp"],
 		data["strength"]
-	)
+		)
+
+	print("Game loaded.")
+	return player
 
 # TIEDOSTONKÄSITTELYT
 
@@ -312,7 +315,10 @@ if player is not None:
 	
 		command = input("Enter command: ")
 	
-		if command == "Investigate upstairs":
+		if command == "Save":
+			save_game(player)
+		
+		elif command == "Investigate upstairs":
 			player.move(upstairs)
 
 			if investigate_upstairs(player):

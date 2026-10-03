@@ -1,0 +1,1 @@
+{"name": "gunther", "hp": 10, "strength": 5, "inventory": ["Rabbit's foot", "Ancient talisman", "Key"], "location": "Basement", "rooms": {"Main floor": {"visited": false, "items": []}, "Armory": {"visited": false, "items": ["Lance"]}, "Kitchen": {"visited": false, "items": ["Dark vial"]}, "Upstairs": {"visited": false, "items": []}, "Basement": {"visited": true, "items": []}}}
